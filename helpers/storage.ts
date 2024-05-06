@@ -6,11 +6,12 @@ const storage = new Storage({
 });
 
 export const uploadToFirebaseStorage = async (
+  bucketName: string,
   filepath: string,
   fileName: string
 ) => {
   try {
-    const gcs = storage.bucket("csv-storage-bucket");
+    const gcs = storage.bucket(bucketName);
     const storagepath = `csv_files/${fileName}`;
     const result = await gcs.upload(filepath, {
       destination: storagepath,
@@ -19,15 +20,40 @@ export const uploadToFirebaseStorage = async (
       },
     });
 
-    return result[0].metadata.mediaLink;
+    return result;
   } catch (error: any) {
     console.log(error);
     throw new Error(error.message);
   }
 };
 
-export const generateV4ReadSignedUrl = async () => {
-  // These options will allow temporary read access to the file
+export const generateV4UploadSignedUrl = async (
+  bucketName: string,
+  fileName: string
+) => {
+  const options: GetSignedUrlConfig = {
+    version: "v4",
+    action: "write",
+    expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    contentType: "application/csv",
+  };
+  try {
+    const [url] = await storage
+      .bucket(bucketName)
+      .file(fileName)
+      .getSignedUrl(options);
+
+    return url;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error(error.message);
+  }
+};
+
+export const generateV4ReadSignedUrl = async (
+  bucketName: string,
+  filePath: string
+) => {
   const options: GetSignedUrlConfig = {
     version: "v4",
     action: "read",
@@ -37,8 +63,8 @@ export const generateV4ReadSignedUrl = async () => {
   try {
     // Get a v4 signed URL for reading the file
     const [url] = await storage
-      .bucket("csv-storage-bucket")
-      .file("csv_files/3095.csv")
+      .bucket(bucketName)
+      .file(filePath)
       .getSignedUrl(options);
 
     return url;
