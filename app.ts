@@ -6,16 +6,20 @@ import {
 } from "./helpers/storage";
 import open from "open";
 import { GetPresignedUrlBody } from "./types/requests/getPresignedUrl";
+import dotenv from "dotenv";
+import setupAuth from "./auth";
 
 const app = express();
-
-app.use(express.json());
-
 const PORT = process.env.PORT || 3000;
+dotenv.config();
+app.use(express.json());
+app.set("view engine", "ejs");
 
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
 });
+
+setupAuth(app);
 
 const main = async () => {
   try {
@@ -36,6 +40,10 @@ const main = async () => {
 };
 
 // main();
+
+app.get("/", function (req, res) {
+  res.render("pages/auth");
+});
 
 app.get("/uploadSignedUrl", async (req: Request<GetPresignedUrlBody>, res) => {
   console.log(req.body);
