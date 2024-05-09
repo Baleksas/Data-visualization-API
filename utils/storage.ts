@@ -73,3 +73,33 @@ export const generateV4ReadSignedUrl = async (
     throw new Error(error.message);
   }
 };
+export async function downloadFile(
+  bucketName: string,
+  fileName: string,
+  destFileName: string
+) {
+  const options = {
+    destination: destFileName,
+  };
+  console.log(bucketName, fileName, destFileName);
+  const response = await storage
+    .bucket(bucketName)
+    .file(fileName)
+    .download(options);
+  console.log("response", response);
+  console.log(`gs://${bucketName}/${fileName} downloaded to ${destFileName}.`);
+}
+
+//FIXME: This function is not working
+export async function downloadFileContent() {
+  const myBucket = storage.bucket("csv-storage-bucket");
+
+  const file = myBucket.file("csv_files/sampleDataname.csv");
+
+  file.download().then(function (data) {
+    console.log(data);
+    const contents = data[0];
+    console.log(contents);
+    return contents;
+  });
+}
