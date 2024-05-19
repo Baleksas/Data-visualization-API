@@ -88,18 +88,21 @@ export async function downloadFile(
     .download(options);
   console.log("response", response);
   console.log(`gs://${bucketName}/${fileName} downloaded to ${destFileName}.`);
+  return response;
 }
 
 //FIXME: This function is not working
-export async function downloadFileContent() {
-  const myBucket = storage.bucket("csv-storage-bucket");
+// We want to use this, to consume content in the app itself - user doesnt need to download the file
+export async function downloadFileContent(
+  storageBucket: string,
+  filepath: string
+) {
+  const myBucket = storage.bucket(storageBucket);
 
-  const file = myBucket.file("csv_files/sampleDataname.csv");
+  const file = myBucket.file(filepath);
 
-  file.download().then(function (data) {
-    console.log(data);
-    const contents = data[0];
-    console.log(contents);
-    return contents;
-  });
+  const data = await file.download();
+  const csvContent = data[0].toString();
+
+  return csvContent;
 }

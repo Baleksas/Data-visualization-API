@@ -83,3 +83,16 @@ app.get("/downloadFile", async (req: Request, res) => {
   // res.send(content);
   res.status(200).send(content);
 });
+app.get("/getFile", async (req: Request, res) => {
+  // "csv_files/sampleDataname.csv"
+  // "csv-storage-bucket"
+  const { bucketName, filePath } = req.query;
+
+  if (typeof bucketName !== "string" || typeof filePath !== "string") {
+    res.status(400).send("Invalid parameters");
+    return;
+  }
+  const fileContent = await downloadFileContent(bucketName, filePath);
+
+  res.send(fileContent);
+});
